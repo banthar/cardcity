@@ -5,13 +5,14 @@
 }
 
 #board {
-  padding: 200px;
+}
+
+#screen {
+  overflow: hidden;
 }
 
 .statusbar {
   border-bottom: 1px solid black;
-  box-shadow: 4px 4px 16px black;
-  position: fixed;
   background: white;
   width: 100%;
 }
