@@ -1,0 +1,48 @@
+* {
+  font-family: Sans;
+  margin: 0;
+  cursor: default;
+}
+
+#board {
+  padding: 200px;
+}
+
+.statusbar {
+  border-bottom: 1px solid black;
+  box-shadow: 4px 4px 16px black;
+  position: fixed;
+  background: white;
+  width: 100%;
+}
+
+.card {
+  width: 220px;
+  border-radius: 8px;
+  border: 8px solid white;
+  box-shadow: 4px 4px 16px #888;
+}
+
+.card-header { 
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  background: red;
+  font-weight: bold;
+  padding-left: 4px;
+}
+
+.card-description { 
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  height: 260px;
+  padding: 8px;
+  background: pink;
+}
+
+.card-footer { 
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  background: red;
+}
