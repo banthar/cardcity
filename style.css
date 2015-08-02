@@ -4,11 +4,13 @@
   cursor: default;
 }
 
-#board {
-}
+body {
+  overflow: hidden;
+} 
 
 #screen {
   overflow: hidden;
+  height: 100%;
 }
 
 .statusbar {
@@ -17,7 +19,30 @@
   width: 100%;
 }
 
+#hand {
+  position: relative;
+  top: -40px;
+  display: flex;
+  justify-content: flex-start;
+  background: white;
+  border-top: 1px solid black;
+}
+
+#hand .card {
+  position: relative;
+  top: -40px;
+  transition: top 0.2s;
+  margin: 4px;
+  margin-right: -140px;
+}
+
+#hand .card:hover{
+  top: -310px;
+  transition: top 0.2s;
+}
+
 .card {
+  min-width: 220px;
   width: 220px;
   border-radius: 8px;
   border: 8px solid white;
@@ -46,4 +71,5 @@
   border-right: 1px solid black;
   border-bottom: 1px solid black;
   background: red;
+  padding-left: 4px;
 }
