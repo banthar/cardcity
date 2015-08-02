@@ -53,7 +53,6 @@ body {
   border-top: 1px solid black;
   border-left: 1px solid black;
   border-right: 1px solid black;
-  background: red;
   font-weight: bold;
   padding-left: 4px;
 }
@@ -63,13 +62,11 @@ body {
   border-right: 1px solid black;
   height: 260px;
   padding: 8px;
-  background: pink;
 }
 
 .card-footer { 
   border-left: 1px solid black;
   border-right: 1px solid black;
   border-bottom: 1px solid black;
-  background: red;
   padding-left: 4px;
 }
