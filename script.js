@@ -1,3 +1,4 @@
+"use strict";
 
 var cardTypes = [
   {
@@ -21,6 +22,10 @@ var cardTypes = [
     color: vec3.fromValues(255.0, 0.0, 255.0),
   },
 ];
+
+function trace() {
+  console.log(arguments);
+}
 
 function createCard() {
   var type = cardTypes[Math.floor(Math.random()*cardTypes.length)];
@@ -65,8 +70,13 @@ function addCard(board, card, x, y) {
 }
 
 
-function addHandCard(hand, card) {
+function addHandCard(screen, hand, card) {
   hand.appendChild(card);
+  card.draggable = true;
+  card.ondragstart = function(e) {
+    e.dataTransfer.setData("card", card);
+    // e.preventDefault();
+  }
 }
 
 function cssColor(rgb) {
@@ -83,19 +93,28 @@ function main() {
     board.style.transform = "matrix("+Array.prototype.join.call(transform, ",")+")";
   };
 
-  screen.onmousemove = function(e) {
-    if(e.buttons === 1) {
-      var translation = mat2d.create();
-      mat2d.fromTranslation(translation, vec2.fromValues(e.movementX, e.movementY));
-      mat2d.multiply(transform, translation, transform);
-      updateTransform();
+  screen.ondrop = function(e) {
+    trace("drop", e);
+  }
+
+  screen.ondragover = function(e) {
+    trace("dragover", e.x, e.y);
+    e.preventDefault();
+  }
+
+  screen.onmousedown = function(e) {
+    screen.onmousemove = function(e) {
+      if(e.buttons === 1) {
+        var translation = mat2d.create();
+        mat2d.fromTranslation(translation, vec2.fromValues(e.movementX, e.movementY));
+        mat2d.multiply(transform, translation, transform);
+        updateTransform();
+      }
+      e.preventDefault();
     }
     e.preventDefault();
   }
-  window.onmousedown = function(e) {
-    e.preventDefault();
-  }
-  window.onmousewheel = function(e) {
+  screen.onmousewheel = function(e) {
     var scaleDelta = Math.pow(1.5, e.wheelDelta/120);
     mat2d.scale(transform, transform, vec2.fromValues(scaleDelta, scaleDelta));
     updateTransform();
@@ -110,7 +129,6 @@ function main() {
   }
 
   for(var y=0;y<10;y++) {
-    addHandCard(hand, createCard());
+    addHandCard(screen, hand, createCard());
   }
-
 }
