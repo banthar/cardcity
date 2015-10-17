@@ -1,5 +1,7 @@
 "use strict";
 
+var ID = 0;
+
 var cardTypes = [
   {
     name: "House",
@@ -23,9 +25,9 @@ var cardTypes = [
   },
 ];
 
-function trace() {
-  console.log(arguments);
-}
+var cardSize = vec2.fromValues(244, 340);
+
+let trace = console.log.bind(console);
 
 function createCard() {
   var type = cardTypes[Math.floor(Math.random()*cardTypes.length)];
@@ -62,25 +64,32 @@ function createCard() {
 }
 
 function addCard(board, card, x, y) {
+  trace(x,y);
   card.style.position = "absolute";
-  card.style.top = y * 340;
-  card.style.left = x * 244;
+  card.style.left = x * cardSize[0];
+  card.style.top = y * cardSize[1];
   card.style.zIndex = x+y;
   board.appendChild(card);
 }
 
-
 function addHandCard(screen, hand, card) {
   hand.appendChild(card);
   card.draggable = true;
+  card.id = "handCard"+(ID++);
   card.ondragstart = function(e) {
-    e.dataTransfer.setData("card", card);
-    // e.preventDefault();
+    e.dataTransfer.setData("card", card.id);
   }
 }
 
 function cssColor(rgb) {
   return "rgb("+Array.prototype.join.call(rgb, ",")+")";
+}
+
+function createDropShadow() {
+  var shadow = document.createElement("DIV");
+  shadow.width = cardSize[0];
+  shadow.height = cardSize[1];
+  return shadow;
 }
 
 function main() {
@@ -89,16 +98,32 @@ function main() {
   var screen=document.getElementById("screen");
   var transform = mat2d.create();
 
+  var dropShadow = createDropShadow();
+  board.appendChild(dropShadow);
+
   var updateTransform = function() {
+    board.style.transformOrigin = "left top";
     board.style.transform = "matrix("+Array.prototype.join.call(transform, ",")+")";
   };
 
+  function getBoardPosition(x, y) {
+    let invertedTransform = mat2d.create();
+    mat2d.invert(invertedTransform, transform);
+    let position = vec2.fromValues(x, y);
+    vec2.transformMat2d(position, position, invertedTransform);
+    return position;
+  } 
+
   screen.ondrop = function(e) {
-    trace("drop", e);
+    let card = document.getElementById(e.dataTransfer.getData("card"));
+    let position = getBoardPosition(e.x, e.y);
+    vec2.divide(position, position, cardSize);
+    addCard(board, card, Math.floor(position[0]), Math.floor(position[1]));
   }
 
   screen.ondragover = function(e) {
-    trace("dragover", e.x, e.y);
+    let position = getBoardPosition(e.x, e.y);
+    trace([e.x, e.y], position);
     e.preventDefault();
   }
 
@@ -122,8 +147,8 @@ function main() {
   }
   updateTransform();
 
-  for(var y=0;y<20;y++) {
-    for(var x=0;x<20;x++) {
+  for(var y=0;y<2;y++) {
+    for(var x=0;x<2;x++) {
       addCard(board, createCard(), x, y);
     }
   }
