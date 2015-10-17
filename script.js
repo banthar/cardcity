@@ -35,6 +35,7 @@ function createBlankCard() {
     card.classList.add("card")
     card.style.width = cardSize[0] - 24;
     card.style.height = cardSize[1] - 24;
+    card.id = "handCard" + (ID++);
     return card;
 }
 
@@ -82,13 +83,18 @@ function addCard(board, card, x, y) {
     board.appendChild(card);
 }
 
-function addHandCard(screen, hand, card) {
-    hand.appendChild(card);
+function addHandCard(hand, card) {
+    card.style.left = null;
+    card.style.top = null;
+    card.style.position = "relative";
     card.draggable = true;
-    card.id = "handCard" + (ID++);
+    card.style.zIndex = null;
     card.ondragstart = function(e) {
         e.dataTransfer.setData("card", card.id);
+        var empty = document.createElement('span');
+        e.dataTransfer.setDragImage(empty, 0, 0);
     }
+    hand.appendChild(card);
 }
 
 function cssColor(rgb) {
@@ -113,6 +119,8 @@ function main() {
     var dropShadow = createDropShadow();
     board.appendChild(dropShadow);
     
+    board.style.pointerEvents = "none";
+
     var updateTransform = function() {
         board.style.transformOrigin = "left top";
         board.style.transform = "matrix(" + Array.prototype.join.call(transform, ",") + ")";
@@ -136,14 +144,16 @@ function main() {
     
     screen.ondragover = function(e) {
         let position = getBoardPosition(e.x, e.y);
-        setCardPosition(dropShadow, Math.floor(position[0]), Math.floor(position[1]));
+        let card = document.getElementById(e.dataTransfer.getData("card"));
+        board.appendChild(card);
+        setCardPosition(card, Math.floor(position[0]), Math.floor(position[1]));
         dropShadow.style.display = "block";
         e.preventDefault();
     }
 
     screen.ondragleave = function(e) {
-        trace(e.path);
-        dropShadow.style.display = "none";
+        let card = document.getElementById(e.dataTransfer.getData("card"));
+        addHandCard(hand, card);
         e.preventDefault();
     }
 
@@ -174,6 +184,6 @@ function main() {
     }
     
     for (var y = 0; y < 10; y++) {
-        addHandCard(screen, hand, createCard());
+        addHandCard(hand, createCard());
     }
 }
