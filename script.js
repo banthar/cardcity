@@ -29,12 +29,20 @@ var cardSize = vec2.fromValues(244, 340);
 
 let trace = console.log.bind(console);
 
+
+function createBlankCard() {
+    var card = document.createElement("DIV");
+    card.classList.add("card")
+    card.style.width = cardSize[0] - 24;
+    card.style.height = cardSize[1] - 24;
+    return card;
+}
+
 function createCard() {
     var type = cardTypes[Math.floor(Math.random() * cardTypes.length)];
     
-    var card = document.createElement("DIV");
-    card.classList.add("card")
-    
+    let card = createBlankCard();
+
     var header = document.createElement("DIV");
     header.classList.add("card-header");
     header.innerText = type.name;
@@ -50,7 +58,6 @@ function createCard() {
     footer.innerText = "+HH";
     card.appendChild(footer);
     
-    
     var background = type.color;
     var lightBackground = vec3.create();
     var limit = 200.0;
@@ -63,12 +70,15 @@ function createCard() {
     return card;
 }
 
-function addCard(board, card, x, y) {
-    trace(x, y);
+function setCardPosition(card, x, y) {
     card.style.position = "absolute";
     card.style.left = x * cardSize[0];
     card.style.top = y * cardSize[1];
     card.style.zIndex = x + y;
+}
+
+function addCard(board, card, x, y) {
+    setCardPosition(card, x, y);
     board.appendChild(card);
 }
 
@@ -86,9 +96,11 @@ function cssColor(rgb) {
 }
 
 function createDropShadow() {
-    var shadow = document.createElement("DIV");
-    shadow.width = cardSize[0];
-    shadow.height = cardSize[1];
+    var shadow = createBlankCard();
+    shadow.style.position = "relative";
+    shadow.style.pointerEvents = "none";
+    shadow.style.display = "none";
+    window.q = shadow;
     return shadow;
 }
 
@@ -105,29 +117,36 @@ function main() {
         board.style.transformOrigin = "left top";
         board.style.transform = "matrix(" + Array.prototype.join.call(transform, ",") + ")";
     }
-    ;
     
     function getBoardPosition(x, y) {
         let invertedTransform = mat2d.create();
         mat2d.invert(invertedTransform, transform);
         let position = vec2.fromValues(x, y);
         vec2.transformMat2d(position, position, invertedTransform);
+        vec2.divide(position, position, cardSize);
         return position;
     }
     
     screen.ondrop = function(e) {
         let card = document.getElementById(e.dataTransfer.getData("card"));
         let position = getBoardPosition(e.x, e.y);
-        vec2.divide(position, position, cardSize);
+        dropShadow.style.display = "none";
         addCard(board, card, Math.floor(position[0]), Math.floor(position[1]));
     }
     
     screen.ondragover = function(e) {
         let position = getBoardPosition(e.x, e.y);
-        trace([e.x, e.y], position);
+        setCardPosition(dropShadow, Math.floor(position[0]), Math.floor(position[1]));
+        dropShadow.style.display = "block";
         e.preventDefault();
     }
-    
+
+    screen.ondragleave = function(e) {
+        trace(e.path);
+        dropShadow.style.display = "none";
+        e.preventDefault();
+    }
+
     screen.onmousedown = function(e) {
         screen.onmousemove = function(e) {
             if (e.buttons === 1) {
