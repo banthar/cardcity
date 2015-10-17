@@ -2,29 +2,6 @@
 
 var ID = 0;
 
-var cardTypes = [
-{
-    name: "House",
-    description: "Small house",
-    color: vec3.fromValues(255.0, 0.0, 0.0),
-}, 
-{
-    name: "School",
-    description: "Small school",
-    color: vec3.fromValues(0.0, 255.0, 0.0),
-}, 
-{
-    name: "Shop",
-    description: "Small shop",
-    color: vec3.fromValues(0.0, 0.0, 255.0),
-}, 
-{
-    name: "Park",
-    description: "Small park",
-    color: vec3.fromValues(255.0, 0.0, 255.0),
-}, 
-];
-
 var cardSize = vec2.fromValues(244, 340);
 
 let trace = console.log.bind(console);
@@ -39,11 +16,9 @@ function createBlankCard() {
     return card;
 }
 
-function createCard() {
-    var type = cardTypes[Math.floor(Math.random() * cardTypes.length)];
-    
+function createCard(type) {
     let card = createBlankCard();
-
+    
     var header = document.createElement("DIV");
     header.classList.add("card-header");
     header.innerText = type.name;
@@ -78,17 +53,19 @@ function setCardPosition(card, x, y) {
     card.style.zIndex = x + y;
 }
 
-function addCard(board, card, x, y) {
+function addCard(board, game, card, x, y) {
     setCardPosition(card, x, y);
+    game.set(x, y, card);
     board.appendChild(card);
 }
 
 function addHandCard(hand, card) {
-    card.style.left = null;
-    card.style.top = null;
+    card.style.left = null ;
+    card.style.top = null ;
     card.style.position = "relative";
     card.draggable = true;
     card.style.zIndex = null;
+    card.style.opacity = null;
     card.ondragstart = function(e) {
         e.dataTransfer.setData("card", card.id);
         var empty = document.createElement('span');
@@ -101,28 +78,15 @@ function cssColor(rgb) {
     return "rgb(" + Array.prototype.join.call(rgb, ",") + ")";
 }
 
-function createDropShadow() {
-    var shadow = createBlankCard();
-    shadow.style.position = "relative";
-    shadow.style.pointerEvents = "none";
-    shadow.style.display = "none";
-    window.q = shadow;
-    return shadow;
-}
-
 function main() {
     var game = new Game();
-    trace(game.f());
     var board = document.getElementById("board");
     var hand = document.getElementById("hand");
     var screen = document.getElementById("screen");
     var transform = mat2d.create();
     
-    var dropShadow = createDropShadow();
-    board.appendChild(dropShadow);
-    
     board.style.pointerEvents = "none";
-
+    
     var updateTransform = function() {
         board.style.transformOrigin = "left top";
         board.style.transform = "matrix(" + Array.prototype.join.call(transform, ",") + ")";
@@ -140,25 +104,35 @@ function main() {
     screen.ondrop = function(e) {
         let card = document.getElementById(e.dataTransfer.getData("card"));
         let position = getBoardPosition(e.x, e.y);
-        dropShadow.style.display = "none";
-        addCard(board, card, Math.floor(position[0]), Math.floor(position[1]));
+        let x = Math.floor(position[0]);
+        let y = Math.floor(position[1]);
+        addCard(board, game, card, x, y);
     }
     
     screen.ondragover = function(e) {
         let position = getBoardPosition(e.x, e.y);
         let card = document.getElementById(e.dataTransfer.getData("card"));
         board.appendChild(card);
-        setCardPosition(card, Math.floor(position[0]), Math.floor(position[1]));
-        dropShadow.style.display = "block";
+        let x = Math.floor(position[0]);
+        let y = Math.floor(position[1]);
+        setCardPosition(card, x, y);
+        card.style.zIndex = Infinity;
+        if(game.canBePlaced(x, y, card)) {
+            e.dataTransfer.dropEffect = "move";
+            card.style.opacity = null;
+        } else {
+            e.dataTransfer.dropEffect = "none";
+            card.style.opacity = 0.25;
+        }
         e.preventDefault();
     }
-
+    
     screen.ondragleave = function(e) {
         let card = document.getElementById(e.dataTransfer.getData("card"));
         addHandCard(hand, card);
         e.preventDefault();
     }
-
+    
     screen.onmousedown = function(e) {
         screen.onmousemove = function(e) {
             if (e.buttons === 1) {
@@ -181,11 +155,11 @@ function main() {
     
     for (var y = 0; y < 2; y++) {
         for (var x = 0; x < 2; x++) {
-            addCard(board, createCard(), x, y);
+            addCard(board, game, createCard(game.randomCard()), x, y);
         }
     }
     
     for (var y = 0; y < 10; y++) {
-        addHandCard(hand, createCard());
+        addHandCard(hand, createCard(game.randomCard()));
     }
 }
