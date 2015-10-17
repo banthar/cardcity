@@ -111,6 +111,8 @@ function createDropShadow() {
 }
 
 function main() {
+    var game = new Game();
+    trace(game.f());
     var board = document.getElementById("board");
     var hand = document.getElementById("hand");
     var screen = document.getElementById("screen");
